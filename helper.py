@@ -1,9 +1,9 @@
-import os
-import numpy as np
-import tensorflow as tf
-from ddpg_lib import * 
-import ipdb as pdb
-import matplotlib.pyplot as plt
+import os #s模块就是对操作系统进行操作，使用该模块必须先导入模块
+import numpy as np #numpy数据处理包
+import tensorflow as tf #神经网络包
+from ddpg_lib import *
+import ipdb as pdb ###？？？？
+import matplotlib.pyplot as plt #画图
 
 state_avg = np.array([0.031,0.153,0.399,0.772,1.274,1.911,2.694,3.630,4.730,6.021,7.902])
 trans_p = np.array([[0.514,0.514,1.000,],
