@@ -15,10 +15,10 @@ class MecTerm(object):
         self.action_dim = user_config['action_dim'] #用户动作a
         self.action_bound = user_config['action_bound'] #用户动作限制
         self.data_buf_size = user_config['data_buf_size'] #用户buffer长度
-        self.t_factor = user_config['t_factor'] #？
+        self.t_factor = user_config['t_factor'] # w
         self.penalty = user_config['penalty'] #用户惩罚
         
-        self.sigma2 = train_config['sigma2'] #？
+        self.sigma2 = train_config['sigma2'] #噪声功率
         self.init_path = '' #路径
         self.isUpdateActor = True #更新Actor？
         self.init_seqCnt = 0 #？
@@ -45,27 +45,27 @@ class MecTerm(object):
     def localProc(self, p): #返回的是本地计算的数据量dl，m（t）公式19
         return np.power(p/self.k, 1.0/3.0)*self.t/self.L/1000 #np，power（x，y）x的y次方 1000？
     
-    def localProcRev(self, b):
+    def localProcRev(self, b): #本地花费的功率
         return np.power(b*1000*self.L/self.t, 3.0)*self.k
     
-    def offloadRev(self, b):
+    def offloadRev(self, b): #offload花费的功率  后面部分IIgmII2 公式16.和20
         return (np.power(2.0, b)-1)*self.sigma2/np.power(np.linalg.norm(self.Channel),2)
     
-    def offloadRev2(self, b):
+    def offloadRev2(self, b): #输出
         return self.action_bound if self.SINR <= 1e-12 else (np.power(2.0, b)-1)/self.SINR
     
-    def getCh(self):
+    def getCh(self): #获得链路
         return self.Channel
     
     def setSINR(self, sinr):
-        self.SINR = sinr
+        self.SINR = sinr #公式16没有分子
         self.sampleCh()
-        channel_gain = np.power(np.linalg.norm(self.Channel),2)/self.sigma2
-        self.State = np.array([self.DataBuf, sinr, channel_gain])
+        channel_gain = np.power(np.linalg.norm(self.Channel),2)/self.sigma2 #链路增益？
+        self.State = np.array([self.DataBuf, sinr, channel_gain]) #s状态
         
     def sampleData(self):
-        data_t = np.log2(1 + self.Power[0]*self.SINR)
-        data_p = self.localProc(self.Power[1])
+        data_t = np.log2(1 + self.Power[0]*self.SINR) #公式20，offload的计算数据量 power[0]是offload功率
+        data_p = self.localProc(self.Power[1]) #在本地计算的数据量 power[1]是本地计算的功率
         over_power = 0
         
         self.DataBuf -= data_t+data_p
