@@ -8,20 +8,20 @@ class MecTerm(object):
     MEC terminal parent class
     """
     def __init__(self, user_config, train_config):
-        self.rate = user_config['rate']
-        self.dis = user_config['dis']
-        self.id = user_config['id']
-        self.state_dim = user_config['state_dim']
-        self.action_dim = user_config['action_dim']
-        self.action_bound = user_config['action_bound']
-        self.data_buf_size = user_config['data_buf_size']
-        self.t_factor = user_config['t_factor']
-        self.penalty = user_config['penalty']
+        self.rate = user_config['rate'] #到达率
+        self.dis = user_config['dis'] #用户距离
+        self.id = user_config['id'] #用户id
+        self.state_dim = user_config['state_dim'] #用户状态s
+        self.action_dim = user_config['action_dim'] #用户动作a
+        self.action_bound = user_config['action_bound'] #用户动作限制
+        self.data_buf_size = user_config['data_buf_size'] #用户buffer长度
+        self.t_factor = user_config['t_factor'] #？
+        self.penalty = user_config['penalty'] #用户惩罚
         
-        self.sigma2 = train_config['sigma2']
-        self.init_path = ''
-        self.isUpdateActor = True
-        self.init_seqCnt = 0
+        self.sigma2 = train_config['sigma2'] #？
+        self.init_path = '' #路径
+        self.isUpdateActor = True #更新Actor？
+        self.init_seqCnt = 0 #？
 
         if 'model' not in user_config:
             self.channelModel = MarkovModel(self.dis, seed=train_config['random_seed'])
@@ -30,20 +30,20 @@ class MecTerm(object):
             n_r = user_config['num_r']
             self.channelModel = ARModel(self.dis, n_t, n_r, seed=train_config['random_seed'])
         
-        self.DataBuf = 0
-        self.Channel = self.channelModel.getCh()
-        self.SINR = 0
-        self.Power = np.zeros(self.action_dim)
-        self.Reward = 0
-        self.State = []
+        self.DataBuf = 0 #用户buffer
+        self.Channel = self.channelModel.getCh() #链路等于这个函数
+        self.SINR = 0 #初始
+        self.Power = np.zeros(self.action_dim) #动作
+        self.Reward = 0 #奖励
+        self.State = [] #状态是list
         
         # some pre-defined parameters
         self.k = 1e-27
-        self.t = 0.001
-        self.L = 500
+        self.t = 0.001 #1ms
+        self.L = 500 #每bit需要的cycles
     
-    def localProc(self, p):
-        return np.power(p/self.k, 1.0/3.0)*self.t/self.L/1000
+    def localProc(self, p): #返回的是本地计算的数据量dl，m（t）公式19
+        return np.power(p/self.k, 1.0/3.0)*self.t/self.L/1000 #np，power（x，y）x的y次方 1000？
     
     def localProcRev(self, b):
         return np.power(b*1000*self.L/self.t, 3.0)*self.k
